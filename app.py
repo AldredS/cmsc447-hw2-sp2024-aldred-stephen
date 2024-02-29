@@ -15,7 +15,7 @@ def display():
     connection = getDbConnection()
     data = connection.execute('SELECT * FROM data').fetchall()
     connection.close()
-    return render_template('home.html', data=data)
+    return render_template('home.html', searchName="", data=data)
 
 #Adds user to the database and refreshes the page to show the change
 @app.route('/insert', methods = ['POST'])
@@ -57,6 +57,17 @@ def delete(entryNum):
     connection.commit()
     connection.close()
     return redirect(url_for('display'))
+
+#Using template to print the array instead of making an entirely new thing
+@app.route('/search', methods = ['POST'])
+def search():
+    if request.method == 'POST':
+        connection = getDbConnection()
+        name = request.form.get('searchName')
+        searchName = "%" + name + "%"
+        data = connection.execute('SELECT * FROM data WHERE user LIKE ?', (searchName,)).fetchall()
+        connection.close()
+        return render_template('home.html', searchName=name, data=data)
 
 if __name__ == "__main__":
     app.run(debug=True)
